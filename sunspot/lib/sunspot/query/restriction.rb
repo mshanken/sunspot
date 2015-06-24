@@ -342,6 +342,22 @@ module Sunspot
         end
       end
 
+      class EndingWith < Base
+        private
+
+        def to_solr_conditional
+          "*#{solr_value(@value)}"
+        end
+      end
+
+      class Contains < Base
+        private
+
+        def to_solr_conditional
+          "*#{solr_value(@value)}*"
+        end
+      end
+
       class AbstractRange < Between
         private
 
