@@ -227,7 +227,7 @@ describe 'scoped_search' do
     end
   end
 
-  describe 'prefix searching' do
+  describe 'prefix, postfix and contains searching' do
     before :each do
       Sunspot.remove_all
       @posts = ['test', 'test post', 'some test', 'bogus'].map do |title|
@@ -238,6 +238,14 @@ describe 'scoped_search' do
 
     it 'should return results whose prefix matches' do
       Sunspot.search(Post) { with(:title).starting_with('test') }.results.should == @posts[0..1]
+    end
+
+    it 'should return results whose postfix matches' do
+      Sunspot.search(Post) { with(:title).ending_with('test') }.results.should == @posts.values_at(0,2)
+    end
+
+    it 'should return results that contains' do
+      Sunspot.search(Post) { with(:title).contains('test') }.results.should == @posts[0..2]
     end
   end
 

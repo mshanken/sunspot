@@ -105,6 +105,20 @@ shared_examples_for "scoped query" do
     connection.should have_last_search_including(:fq, 'title_ss:tes*')
   end
 
+  it 'scopes by postfix match with string' do
+    search do
+      with(:title).ending_with('est')
+    end
+    connection.should have_last_search_including(:fq, 'title_ss:*est')
+  end
+
+  it 'scopes by contain match with string' do
+    search do
+      with(:title).contains('es')
+    end
+    connection.should have_last_search_including(:fq, 'title_ss:*es*')
+  end
+  
   it 'scopes by not equal match with string' do
     search do
       without :title, 'Bad Post'
