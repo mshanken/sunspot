@@ -17,6 +17,12 @@ module Sunspot
       def index!(*objects)
       end
 
+      def atomic_update(clazz, updates = {})
+      end
+
+      def atomic_update!(clazz, updates = {})
+      end
+
       def remove(*objects)
       end
 
@@ -36,6 +42,10 @@ module Sunspot
       end
 
       def optimize
+      end
+
+      def config
+        Sunspot::Configuration.build
       end
 
       def dirty?
@@ -110,6 +120,10 @@ module Sunspot
           DataAccessorStub.new
         end
 
+        def stats(name)
+          StatsStub.new
+        end
+
         def execute
           self
         end
@@ -148,6 +162,7 @@ module Sunspot
         def previous_page
           nil
         end
+        alias :prev_page :previous_page
 
         def next_page
           nil
@@ -167,6 +182,49 @@ module Sunspot
 
         def rows
           []
+        end
+
+      end
+
+      class StatsStub
+        def min
+          0
+        end
+
+        def max
+          100
+        end
+
+        def count
+          30
+        end
+
+        def sum
+          500
+        end
+
+        def missing
+          3
+        end
+
+        def sum_of_squares
+          5000
+        end
+
+        def mean
+          50
+        end
+
+        def standard_deviation
+          20
+        end
+
+        def facets
+          []
+        end
+
+        def facet(name)
+          FacetStub.new
         end
 
       end

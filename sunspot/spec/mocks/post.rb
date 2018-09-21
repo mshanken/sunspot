@@ -15,6 +15,10 @@ class Post < SuperClass
     @custom_string ||= {}
   end
 
+  def custom_underscored_string
+    @custom_underscored_string ||= {}
+  end
+
   def custom_fl
     @custom_fl ||= {}
   end
@@ -28,17 +32,21 @@ class Post < SuperClass
   end
 
   private
-  attr_writer :category_ids, :custom_string, :custom_fl, :custom_time, :custom_boolean
+  attr_writer :category_ids, :custom_string, :custom_underscored_string, :custom_fl, :custom_time, :custom_boolean
 end
 
 Sunspot.setup(Post) do
   text :title, :boost => 2
+  text :text_array, :boost => 3 do
+    [title, title]
+  end
   text :body, :stored => true, :more_like_this => true
   text :backwards_title do
     title.reverse if title
   end
   text :tags, :more_like_this => true
   string :title, :stored => true
+  string :author_name
   integer :blog_id, :references => Blog
   integer :category_ids, :multiple => true
   float :average_rating, :using => :ratings_average, :trie => true
@@ -59,6 +67,7 @@ Sunspot.setup(Post) do
   latlon(:coordinates_new) { coordinates }
 
   dynamic_string :custom_string, :stored => true
+  dynamic_string :custom_underscored_string, separator: '__'
   dynamic_float :custom_float, :multiple => true, :using => :custom_fl
   dynamic_integer :custom_integer do
     category_ids.inject({}) do |hash, category_id|
@@ -80,7 +89,11 @@ Sunspot.setup(Post) do
 
   string :legacy_array, :as => :legacy_array_field_sm, :multiple => true do
     ['first string', 'second string']
- 	end
+  end
+
+  string :tag_list, :multiple => true, :stored => true do
+    tags
+  end
 end
 
 class PhotoPost < Post

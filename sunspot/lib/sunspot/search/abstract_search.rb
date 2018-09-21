@@ -16,7 +16,7 @@ module Sunspot
       # Retrieve all facet objects defined for this search, in order they were
       # defined. To retrieve an individual facet by name, use #facet()
       #
-      attr_reader :facets, :groups, :stats
+      attr_reader :facets, :groups
       attr_reader :query #:nodoc:
       attr_accessor :request_handler
 
@@ -160,11 +160,13 @@ module Sunspot
       #
       def facet(name, dynamic_name = nil)
         if name
-          if dynamic_name
-            @facets_by_name[:"#{name}:#{dynamic_name}"]
-          else
-            @facets_by_name[name.to_sym]
-          end
+          facet_name = if dynamic_name
+                         separator = @setup.dynamic_field_factory(name).separator
+                         [name, dynamic_name].join(separator)
+                       else
+                         name
+                       end.to_sym
+          @facets_by_name[facet_name]
         end
       end
 
@@ -180,6 +182,10 @@ module Sunspot
         end
       end
 
+      def json_facet_stats(name, options = {})
+        JsonFacetStats.new(name, self, options)
+      end
+
       #
       # Deprecated in favor of optional second argument to #facet
       #
@@ -189,6 +195,10 @@ module Sunspot
 
       def facet_response #:nodoc:
         @solr_result['facet_counts']
+      end
+
+      def json_facet_response #:nodoc:
+        @solr_result['facets']
       end
 
       def stats_response #:nodoc:
@@ -222,8 +232,12 @@ module Sunspot
         "<Sunspot::Search:#{query.to_params.inspect}>"
       end
 
-      def add_field_group(field) #:nodoc:
-        add_group(field.name, FieldGroup.new(field, self))
+      def add_group(group) #:nodoc:
+        group.fields.each do |field|
+          add_subgroup(field.name, FieldGroup.new(field, self))
+        end
+
+        add_subgroup(:queries, QueryGroup.new(group.queries, self)) if group.queries.any?
       end
 
       def add_field_facet(field, options = {}) #:nodoc:
@@ -247,6 +261,11 @@ module Sunspot
 
       def add_field_stats(field) #:nodoc:
         add_stats(field.name, FieldStats.new(field, self))
+      end
+
+      def add_json_facet(field, options = {})
+        name = (options[:name] || field.name)
+        add_facet(name, FieldJsonFacet.new(field, self, options))
       end
 
       def highlights_for(doc) #:nodoc:
@@ -303,7 +322,7 @@ module Sunspot
         @stats_by_name[name.to_sym] = stats
       end
 
-      def add_group(name, group)
+      def add_subgroup(name, group)
         @groups << group
         @groups_by_name[name.to_sym] = group
       end

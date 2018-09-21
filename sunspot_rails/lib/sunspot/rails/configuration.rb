@@ -12,10 +12,10 @@ module Sunspot #:nodoc:
     #     solr:
     #       hostname: localhost
     #       port: 8982
-    #       min_memory: 512M
-    #       max_memory: 1G
+    #       memory: 1G
     #       solr_jar: /some/path/solr15/start.jar
     #       bind_address: 0.0.0.0
+    #       proxy: false
     #     disabled: false
     #   test:
     #     solr:
@@ -24,6 +24,7 @@ module Sunspot #:nodoc:
     #       log_level: OFF
     #       open_timeout: 0.5
     #       read_timeout: 2
+    #       proxy: false
     #   production:
     #     solr:
     #       scheme: http
@@ -36,6 +37,7 @@ module Sunspot #:nodoc:
     #       solr_home: /some/path
     #       open_timeout: 0.5
     #       read_timeout: 2
+    #       proxy: http://proxy.com:12345
     #     master_solr:
     #       hostname: localhost
     #       port: 8982
@@ -278,17 +280,10 @@ module Sunspot #:nodoc:
       end
 
       #
-      # Minimum java heap size for Solr instance
+      # java heap size for Solr instance
       #
-      def min_memory
-        @min_memory ||= user_configuration_from_key('solr', 'min_memory')
-      end
-
-      #
-      # Maximum java heap size for Solr instance
-      #
-      def max_memory
-        @max_memory ||= user_configuration_from_key('solr', 'max_memory')
+      def memory
+        @memory ||= user_configuration_from_key('solr', 'memory')
       end
 
       #
@@ -304,6 +299,14 @@ module Sunspot #:nodoc:
 
       def open_timeout
         @open_timeout ||= user_configuration_from_key('solr', 'open_timeout')
+      end
+
+      def update_format
+        @update_format ||= user_configuration_from_key('solr', 'update_format')
+      end
+
+      def proxy
+        @proxy ||= user_configuration_from_key('solr', 'proxy')
       end
 
       #

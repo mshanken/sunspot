@@ -24,8 +24,11 @@ REM set SOLR_JAVA_HOME=
 REM Increase Java Min/Max Heap as needed to support your indexing / query needs
 set SOLR_JAVA_MEM=-Xms512m -Xmx512m
 
-REM Enable verbose GC logging
-set GC_LOG_OPTS=-verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationStoppedTime
+REM Enable verbose GC logging (Java 9+)
+REM set GC_LOG_OPTS=-Xlog:gc*
+
+REM Enable verbose GC logging (Java <9)
+REM set GC_LOG_OPTS=-verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationStoppedTime
 
 REM These GC settings have shown to work well for a number of common Solr workloads
 set GC_TUNE=-XX:NewRatio=3 ^
@@ -73,8 +76,8 @@ REM set SOLR_OPTS=%SOLR_OPTS% -Dsolr.autoSoftCommit.maxTime=3000
 REM set SOLR_OPTS=%SOLR_OPTS% -Dsolr.autoCommit.maxTime=60000
 REM set SOLR_OPTS=%SOLR_OPTS% -Dsolr.clustering.enabled=true
 
-REM Path to a directory where Solr creates index files, the specified directory
-REM must contain a solr.xml; by default, Solr will use server/solr
+REM Path to a directory for Solr to store cores and their data. By default, Solr will use server\solr
+REM If solr.xml is not stored in ZooKeeper, this directory needs to contain solr.xml
 REM set SOLR_HOME=
 
 REM Sets the port Solr binds to, default is 8983
@@ -82,8 +85,16 @@ REM set SOLR_PORT=8983
 
 REM Uncomment to set SSL-related system properties
 REM Be sure to update the paths to the correct keystore for your environment
-REM set SOLR_SSL_OPTS=-Djavax.net.ssl.keyStore=etc/solr-ssl.keystore.jks -Djavax.net.ssl.keyStorePassword=secret -Djavax.net.ssl.trustStore=etc/solr-ssl.keystore.jks -Djavax.net.ssl.trustStorePassword=secret
+REM set SOLR_SSL_KEY_STORE=etc/solr-ssl.keystore.jks
+REM set SOLR_SSL_KEY_STORE_PASSWORD=secret
+REM set SOLR_SSL_TRUST_STORE=etc/solr-ssl.keystore.jks
+REM set SOLR_SSL_TRUST_STORE_PASSWORD=secret
+REM set SOLR_SSL_NEED_CLIENT_AUTH=false
+REM set SOLR_SSL_WANT_CLIENT_AUTH=false
 
-REM Uncomment to set a specific SSL port (-Djetty.ssl.port=N); if not set
-REM and you are using SSL, then the start script will use SOLR_PORT for the SSL port
-REM set SOLR_SSL_PORT=
+REM Uncomment if you want to override previously defined SSL values for HTTP client
+REM otherwise keep them commented and the above values will automatically be set for HTTP clients
+REM set SOLR_SSL_CLIENT_KEY_STORE=
+REM set SOLR_SSL_CLIENT_KEY_STORE_PASSWORD=
+REM setSOLR_SSL_CLIENT_TRUST_STORE=
+REM setSOLR_SSL_CLIENT_TRUST_STORE_PASSWORD=
